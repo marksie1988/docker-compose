@@ -1,0 +1,40 @@
+version: '3.6'
+
+services:
+  plex:
+    image: linuxserver/plex
+    container_name: plex
+    restart: always
+    volumes:
+      - plex_conf:/config
+      - plex_tv:/data/tvshows
+      - plex_mov:/data/movies
+    ports:
+      - 32400:32400
+      - 32400:32400/udp
+      - 32469:32469
+      - 32469:32469/udp
+      - 5353:5353/udp
+      - 1900:1900/udp
+    environment:
+      - VERSION=latest
+      - TZ=Europe/London
+      - PUID=666
+      - PGID=1001
+    network_mode: host
+volumes:
+  plex_conf:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/plex/conf
+      o: bind
+  plex_mov:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/media/movies
+      o: bind
+  plex_tv:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/media/tv
+      o: bind

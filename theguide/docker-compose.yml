@@ -1,0 +1,120 @@
+version: '3.6'
+services:
+  proxy:
+    image: linuxserver/letsencrypt
+    container_name: proxy
+    hostname: proxy
+    restart: always
+    volumes:
+      - proxy_conf:/config
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - URL=marksiesplace.co.uk
+      - SUBDOMAINS=wildcard
+      - VALIDATION=dns
+      - DNSPLUGIN=route53
+      - TZ=Europe/London
+    networks:
+      - proxy_be
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    hostname: sonarr
+    depends_on:
+      - proxy
+    restart: always
+    volumes:
+      #- sonarr_conf:/config:rw
+      - /home/media_svc/sonarr/conf:/config:rw
+      - downloads:/downloads:rw
+      - sonarr_tv:/tv:rw
+    ports:
+      - 8989:8989
+    environment:
+      - PGID=1001
+      - PUID=666
+      - TZ=Europe/London
+    networks:
+      - proxy_be
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    hostname: radarr
+    depends_on:
+      - proxy
+    restart: always
+    volumes:
+      - radarr_conf:/config
+      - downloads:/downloads
+      - radarr_mov:/movies
+    ports:
+      - 7878:7878
+    environment:
+      - PGID=1001
+      - PUID=666
+      - TZ=Europe/London
+    networks:
+      - proxy_be
+  plexpy:
+    image: linuxserver/tautulli
+    container_name: plexpy
+    hostname: plexpy
+    depends_on:
+      - proxy
+    restart: always
+    volumes:
+      - plexpy_conf:/config
+      - plexpy_logs:/logs:ro
+    ports:
+      - 8181:8181
+    environment:
+      - PGID=1001
+      - PUID=666
+      - TZ=Eurpoe/London
+    networks:
+      - proxy_be
+networks:
+  proxy_be:
+volumes:
+  proxy_conf:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/proxy/conf
+      o: bind
+  plexpy_conf:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/plexpy/conf
+      o: bind
+  plexpy_logs:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/plexpy/logs
+      o: bind
+  sonarr_conf:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/sonarr/conf
+      o: bind
+  downloads:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/deluge/downloads
+      o: bind
+  sonarr_tv:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/media/tv
+      o: bind
+  radarr_conf:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/radarr/conf
+      o: bind
+  radarr_mov:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/media/movies
+      o: bind
