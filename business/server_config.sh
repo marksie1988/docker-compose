@@ -1,7 +1,7 @@
 #!/bin/bash
 yum -y install epel-release
 yum -y update
-yum -y install git open-vm-tools
+yum -y install git open-vm-tools nfs-utils
 
 # create user for docker file access
 groupadd -g 1001 nfs_svc
