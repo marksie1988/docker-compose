@@ -1,0 +1,113 @@
+version: '3.6'
+services:
+  wiki-db:
+    image: mariadb
+    container_name: wiki-db
+    hostname: wiki-db
+    volumes:
+      - wiki_dbs:/var/lib/mysql
+    restart: always
+    env_file: .env.wiki
+  wiki:
+    image: mediawiki
+    container_name: wiki
+    hostname: wiki
+    ports:
+      - 8080:80
+    volumes:
+      - wiki_images:/var/www/html/images
+      # After initial setup, download LocalSettings.php to the same directory as
+      # this yaml and uncomment the following line and use compose to restart
+      # the mediawiki service
+      #- ./LocalSettings.php:/var/www/html/LocalSettings.php
+    restart: always
+    env_file: .env.wiki
+  ninja-db:
+    container_name: ninja-db
+    image: mysql:5.6
+    env_file: .env
+    volumes:
+      - ninja_dbs:/var/lib/mysql
+    networks:
+      - ninja-backend
+    restart: always
+  ninja-app:
+    container_name: ninja-app
+    image: invoiceninja/invoiceninja
+    env_file: .env
+    volumes:
+      - ninja_stor:/var/www/app/storage:rw
+      - ninja_logo:/var/www/app/public/logo:rw
+    depends_on:
+      - ninja-db
+    networks:
+      - ninja-backend
+    restart: always
+  ninja-web:
+    container_name: ninja-web
+    image: nginx
+    volumes:
+      - ninja_nginx:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - ninja-app
+    volumes_from:
+      - ninja-app
+    ports:
+      - 80:80
+    networks:
+      - ninja-backend
+    restart: always
+  cron:
+    container_name: ninja-cron
+    image: invoiceninja/invoiceninja
+    depends_on:
+      - ninja-db
+    volumes_from:
+      - ninja-app
+    entrypoint: |
+      bash -c 'bash -s <<EOF
+      trap "break;exit" SIGHUP SIGINT SIGTERM
+      sleep 300s
+      while /bin/true; do
+        ./artisan ninja:send-invoices
+        ./artisan ninja:send-reminders
+        sleep 1h
+      done
+      EOF'
+    networks:
+      - ninja-backend
+    restart: always
+
+volumes:
+  wiki_dbs:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/wiki/dbs
+      o: bind
+  wiki_images:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/wiki/images
+      o: bind
+  ninja_stor:
+      driver_opts:
+        type: none
+        device: /mnt/nfs/dockerfiles/ninja/storage
+        o: bind
+  ninja_logo:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/ninja/logo
+      o: bind
+  ninja_dbs:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/ninja/dbs
+      o: bind
+  ninja_nginx:
+    driver_opts:
+      type: none
+      device: /mnt/nfs/dockerfiles/ninja/nginx.conf
+      o: bind
+networks:
+  ninja-backend:
