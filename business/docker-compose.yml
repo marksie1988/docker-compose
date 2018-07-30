@@ -8,6 +8,8 @@ services:
       - wiki_dbs:/var/lib/mysql
     restart: always
     env_file: .env.wiki
+    networks:
+      - wiki-backend
   wiki:
     image: mediawiki
     container_name: wiki
@@ -22,6 +24,8 @@ services:
       #- ./LocalSettings.php:/var/www/html/LocalSettings.php
     restart: always
     env_file: .env.wiki
+    networks:
+      - wiki-backend
   ninja-db:
     container_name: ninja-db
     image: mysql:5.6
@@ -107,3 +111,4 @@ volumes:
       o: bind
 networks:
   ninja-backend:
+  wiki-backend:

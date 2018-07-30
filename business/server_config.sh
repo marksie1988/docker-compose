@@ -11,3 +11,7 @@ useradd -u 666 -g 1001 nfs_svc
 echo "10.8.10.100:/mnt/media/dockerfiles      /mnt/nfs/dockerfiles    nfs     auto,bg,nolock,noatime,actimeo=1800     0 0" >> /etc/fstab
 # mount the new nfs link
 mount -a
+
+firewall-cmd --permanent --add-port=8080/tcp --zone=public
+firewall-cmd --permanent --add-service=http/tcp --zone=public
+firewall-cmf --reload
