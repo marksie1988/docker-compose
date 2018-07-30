@@ -25,7 +25,7 @@ services:
   ninja-db:
     container_name: ninja-db
     image: mysql:5.6
-    env_file: .env
+    env_file: .env.ninja
     volumes:
       - ninja_dbs:/var/lib/mysql
     networks:
@@ -34,7 +34,7 @@ services:
   ninja-app:
     container_name: ninja-app
     image: invoiceninja/invoiceninja
-    env_file: .env
+    env_file: .env.ninja
     volumes:
       - ninja_stor:/var/www/app/storage:rw
       - ninja_logo:/var/www/app/public/logo:rw
