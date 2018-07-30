@@ -47,7 +47,7 @@ services:
     container_name: ninja-web
     image: nginx
     volumes:
-      - ninja_nginx:/etc/nginx/nginx.conf:ro
+      - /mnt/nfs/dockerfiles/ninja/nginx.conf:/etc/nginx/nginx.conf:ro
       - ninja_stor:/var/www/app/storage:rw
       - ninja_logo:/var/www/app/public/logo:rw
     depends_on:
@@ -104,11 +104,6 @@ volumes:
     driver_opts:
       type: none
       device: /mnt/nfs/dockerfiles/ninja/dbs
-      o: bind
-  ninja_nginx:
-    driver_opts:
-      type: none
-      device: /mnt/nfs/dockerfiles/ninja/nginx.conf
       o: bind
 networks:
   ninja-backend:
