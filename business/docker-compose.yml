@@ -48,9 +48,9 @@ services:
     image: nginx
     volumes:
       - ninja_nginx:/etc/nginx/nginx.conf:ro
+      - ninja_stor:/var/www/app/storage:rw
+      - ninja_logo:/var/www/app/public/logo:rw
     depends_on:
-      - ninja-app
-    volumes_from:
       - ninja-app
     ports:
       - 80:80
@@ -62,8 +62,9 @@ services:
     image: invoiceninja/invoiceninja
     depends_on:
       - ninja-db
-    volumes_from:
-      - ninja-app
+    volumes:
+      - ninja_stor:/var/www/app/storage:rw
+      - ninja_logo:/var/www/app/public/logo:rw
     entrypoint: |
       bash -c 'bash -s <<EOF
       trap "break;exit" SIGHUP SIGINT SIGTERM
