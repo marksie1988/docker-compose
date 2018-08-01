@@ -1,38 +1,5 @@
 version: '3.6'
 services:
-  wiki-db:
-    image: 'bitnami/mariadb:latest'
-    container_name: wiki-db
-    hostname: wiki-db
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-      - MARIADB_USER=bn_mwiki
-      - MARIADB_DATABASE=mwiki
-    volumes:
-      - 'wiki_dbs:/bitnami'
-    networks:
-      - wiki-backend
-  wiki:
-    image: 'bitnami/mediawiki:latest'
-    container_name: wiki
-    hostname: wiki
-    labels:
-      kompose.service.type: nodeport
-    environment:
-      - MARIADB_HOST=wiki-db
-      - MARIADB_PORT_NUMBER=3306
-      - MEDIAWIKI_DATABASE_USER=bn_mwiki
-      - MEDIAWIKI_DATABASE_NAME=mwiki
-      - ALLOW_EMPTY_PASSWORD=yes
-    ports:
-      - '8080:80'
-      - '8443:443'
-    volumes:
-      - 'wiki_data:/bitnami'
-    depends_on:
-      - wiki-db
-    networks:
-      - wiki-backend
   ninja-db:
     container_name: ninja-db
     image: mysql:5.6
@@ -91,16 +58,6 @@ services:
     restart: always
 
 volumes:
-  wiki_dbs:
-    driver_opts:
-      type: none
-      device: /mnt/nfs/dockerfiles/wiki/dbs
-      o: bind
-  wiki_data:
-    driver_opts:
-      type: none
-      device: /mnt/nfs/dockerfiles/wiki/data
-      o: bind
   ninja_stor:
       driver_opts:
         type: none
@@ -118,4 +75,3 @@ volumes:
       o: bind
 networks:
   ninja-backend:
-  wiki-backend:
