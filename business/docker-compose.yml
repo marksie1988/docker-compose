@@ -1,31 +1,33 @@
 version: '3.6'
 services:
   wiki-db:
-    image: mariadb
+    image: 'bitnami/mariadb:latest'
     container_name: wiki-db
     hostname: wiki-db
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MARIADB_USER=bn_mwiki
+      - MARIADB_DATABASE=mwiki
     volumes:
-      - wiki_dbs:/var/lib/mysql
-    restart: always
-    env_file: .env.wiki
-    networks:
-      - wiki-backend
+      - 'wiki_dbs:/bitnami'
   wiki:
-    image: mediawiki
+    image: 'bitnami/mediawiki:latest'
     container_name: wiki
     hostname: wiki
+    labels:
+      kompose.service.type: nodeport
+    environment:
+      - MARIADB_HOST=wiki-db
+      - MARIADB_PORT_NUMBER=3306
+      - MEDIAWIKI_DATABASE_USER=bn_mwiki
+      - MEDIAWIKI_DATABASE_NAME=bitnami_mwiki
+      - ALLOW_EMPTY_PASSWORD=yes
     ports:
-      - 8080:80
+      - '8080:80'
     volumes:
-      - wiki_images:/var/www/html/images
-      # After initial setup, download LocalSettings.php to the same directory as
-      # this yaml and uncomment the following line and use compose to restart
-      # the mediawiki service
-      #- ./LocalSettings.php:/var/www/html/LocalSettings.php
-    restart: always
-    env_file: .env.wiki
-    networks:
-      - wiki-backend
+      - 'wiki_data:/bitnami'
+    depends_on:
+      - wiki-db
   ninja-db:
     container_name: ninja-db
     image: mysql:5.6
@@ -89,10 +91,10 @@ volumes:
       type: none
       device: /mnt/nfs/dockerfiles/wiki/dbs
       o: bind
-  wiki_images:
+  wiki_data:
     driver_opts:
       type: none
-      device: /mnt/nfs/dockerfiles/wiki/images
+      device: /mnt/nfs/dockerfiles/wiki/data
       o: bind
   ninja_stor:
       driver_opts:
