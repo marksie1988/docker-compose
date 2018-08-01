@@ -10,6 +10,8 @@ services:
       - MARIADB_DATABASE=mwiki
     volumes:
       - 'wiki_dbs:/bitnami'
+    networks:
+      - wiki-backend
   wiki:
     image: 'bitnami/mediawiki:latest'
     container_name: wiki
@@ -24,10 +26,13 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - '8080:80'
+      - '8443:443'
     volumes:
       - 'wiki_data:/bitnami'
     depends_on:
       - wiki-db
+    networks:
+      - wiki-backend
   ninja-db:
     container_name: ninja-db
     image: mysql:5.6
