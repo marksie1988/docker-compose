@@ -22,7 +22,7 @@ services:
       - MARIADB_HOST=wiki-db
       - MARIADB_PORT_NUMBER=3306
       - MEDIAWIKI_DATABASE_USER=bn_mwiki
-      - MEDIAWIKI_DATABASE_NAME=bitnami_mwiki
+      - MEDIAWIKI_DATABASE_NAME=mwiki
       - ALLOW_EMPTY_PASSWORD=yes
     ports:
       - '8080:80'
