@@ -3,10 +3,22 @@ yum -y install epel-release
 yum -y update
 yum -y install open-vm-tools nfs-utils mariadb-server mariadb httpd php php-mysql php-xml php-intl php-gd php-xcache nodejs npm vim-enhanced git policycoreutils-python
 
+# create NFS Directories
+if [ ! -d "/mnt/nfs/wiki" ]; then
+  mkdir -p /mnt/nfs/wiki/dbs
+  mkdir -p /mnt/nfs/wiki/data
+fi
+
 # add nfs mount
+if grep -Fxq "10.8.10.100:/mnt/media/wiki/" /etc/fstab
+then
 echo "10.8.10.100:/mnt/media/wiki/      /mnt/nfs/wiki    nfs     auto,bg,nolock,noatime,actimeo=1800     0 0" >> /etc/fstab
+fi
+
 # mount the new nfs link
 mount -a
+
+
 
 ln -s /mnt/nfs/wiki/dbs  /var/lib/mysql
 ln -s /mnt/nfs/wiki/data  /var/www/html
@@ -18,7 +30,7 @@ sudo systemctl start httpd.service
 sudo systemctl start mariadb
 
 # allow http through firewall
-firewall-cmd --permanent --add-service=http/tcp --zone=public
+firewall-cmd --permanent --add-service=http --zone=public
 firewall-cmd --permanent --zone=public --add-port=8000/tcp
 firewall-cmd --reload
 
@@ -28,16 +40,25 @@ curl -O https://releases.wikimedia.org/mediawiki/1.31/mediawiki-1.31.0.tar.gz
 tar xvzf mediawiki-*.tar.gz
 sudo mv mediawiki-1.24.1/* /var/www/html
 
-# mysql secure install
-mysql -sfu root < "mysql_secure_installation.sql"
+# check mariadb is started
 
-# create database
-mysql -sfu root < "mwiki_mysql.sql"
+if ps ax | grep -v grep | grep mariadb > /dev/null
+then
+  # mysql secure install
+  mysql -sfu root < "mysql_secure_installation.sql"
+  # create database
+  mysql -sfu root < "mwiki_mysql.sql"
+else
+    sudo systemctl start mariadb
+    mysql -sfu root < "mysql_secure_installation.sql"
+    mysql -sfu root < "mwiki_mysql.sql"
+fi
+
 
 # install Parsoid
 cd ~
 git clone https://gerrit.wikimedia.org/r/p/mediawiki/services/parsoid
-cp -rv ~/parsoid /opt/
+cp -r ~/parsoid /opt/
 cd /opt/parsoid/
 npm install
 
@@ -52,7 +73,7 @@ EOT
 
 chown -Rv root:root /opt/parsoid
 chmod -Rv u+rw,g+r,o+r /opt/parsoid
-chcon -Rv --type=system_u:object_r:usr_t:s0 /opt/parsoid
+
 semanage port -m -t http_port_t -p tcp 8000
 setsebool httpd_can_network_connect 0
 
@@ -86,8 +107,8 @@ systemctl enable parsoid.service
 
 git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/VisualEditor.git
 git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/UniversalLanguageSelector.git
-cp -rV VisualEditor /var/www/html/extensions/
-cp -rV UniversalLanguageSelector /var/www/html/extensions/
+cp -r VisualEditor /var/www/html/extensions/
+cp -r UniversalLanguageSelector /var/www/html/extensions/
 
 cat <<EOT >> /var/www/html/LocalSettings.php
 # UniversalLanguageSelector
