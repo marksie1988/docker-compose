@@ -45,10 +45,11 @@ sudo mv mediawiki-1.24.1/* /var/www/html
 # check mariadb is started
 if ps ax | grep -v grep | grep mariadb > /dev/null
 then
-  # mysql secure install
-  mysql -sfu root < "mysql_secure_installation.sql"
   # create database
   mysql -sfu root < "mwiki_mysql.sql"
+  # mysql secure install
+  mysql -sfu root < "mysql_secure_installation.sql"
+
 else
     sudo systemctl start mariadb
     mysql -sfu root < "mysql_secure_installation.sql"
