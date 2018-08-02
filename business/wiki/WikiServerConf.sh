@@ -20,8 +20,8 @@ mount -a
 
 
 
-ln -s /mnt/nfs/wiki/dbs  /var/lib/mysql
-ln -s /mnt/nfs/wiki/data  /var/www/html
+ln -sfn /mnt/nfs/wiki/dbs  /var/lib/mysql
+ln -sfn /mnt/nfs/wiki/data  /var/www/html
 
 # enable and start services
 sudo systemctl enable httpd.service
