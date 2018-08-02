@@ -40,7 +40,7 @@ firewall-cmd --reload
 
 curl -O https://releases.wikimedia.org/mediawiki/1.31/mediawiki-1.31.0.tar.gz
 tar xvzf mediawiki-*.tar.gz
-sudo mv mediawiki-1.24.1/* /var/www/html
+sudo mv -R mediawiki-1.31.0/* /var/www/html
 
 # check mariadb is started
 if ps ax | grep -v grep | grep mariadb > /dev/null
