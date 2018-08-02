@@ -1,4 +1,6 @@
 #!/bin/bash
+WORKING_DIR=$PWD
+
 yum -y install epel-release
 yum -y update
 yum -y install open-vm-tools nfs-utils mariadb-server mariadb httpd php php-mysql php-xml php-intl php-gd php-xcache nodejs npm vim-enhanced git policycoreutils-python
@@ -21,7 +23,6 @@ mount -a
 mkdir -p /mnt/nfs/wiki/dbs
 mkdir -p /mnt/nfs/wiki/data
 
-ln -sfn /mnt/nfs/wiki/dbs  /var/lib/mysql
 ln -sfn /mnt/nfs/wiki/data  /var/www/html
 
 # enable and start services
@@ -42,7 +43,6 @@ tar xvzf mediawiki-*.tar.gz
 sudo mv mediawiki-1.24.1/* /var/www/html
 
 # check mariadb is started
-
 if ps ax | grep -v grep | grep mariadb > /dev/null
 then
   # mysql secure install
@@ -55,6 +55,14 @@ else
     mysql -sfu root < "mwiki_mysql.sql"
 fi
 
+#copy backup script
+cd $WORKING_DIR
+cp MySQL_Backup.sh /usr/local/bin/MySQL_Backup.sh
+
+crontab -l > mycron
+echo "10 * * * * /usr/local/bin/MySQL_Backup.sh -u root -p Your-pass -h localhost -d my_wiki -b /mnt/nfs/wiki/dbs" >> mycron
+crontab mycron
+rm mycron
 
 # install Parsoid
 cd ~
