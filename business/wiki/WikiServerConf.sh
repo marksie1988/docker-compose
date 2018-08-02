@@ -77,6 +77,10 @@ chmod -Rv u+rw,g+r,o+r /opt/parsoid
 semanage port -m -t http_port_t -p tcp 8000
 setsebool httpd_can_network_connect 0
 
+if [ -f /etc/systemd/system/parsoid.service ]; then
+  rm -rf /etc/systemd/system/parsoid.service
+fi
+
 cat <<EOT >> /etc/systemd/system/parsoid.service
 [Unit]
 Description=Mediawiki Parsoid web service on node.js
