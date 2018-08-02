@@ -3,10 +3,9 @@ yum -y install epel-release
 yum -y update
 yum -y install open-vm-tools nfs-utils mariadb-server mariadb httpd php php-mysql php-xml php-intl php-gd php-xcache nodejs npm vim-enhanced git policycoreutils-python
 
-# create NFS Directories
+# create NFS Directory
 if [ ! -d "/mnt/nfs/wiki" ]; then
-  mkdir -p /mnt/nfs/wiki/dbs
-  mkdir -p /mnt/nfs/wiki/data
+  mkdir -p /mnt/nfs/wiki/
 fi
 
 # add nfs mount
@@ -18,7 +17,9 @@ fi
 # mount the new nfs link
 mount -a
 
-
+# create required Directories
+mkdir -p /mnt/nfs/wiki/dbs
+mkdir -p /mnt/nfs/wiki/data
 
 ln -sfn /mnt/nfs/wiki/dbs  /var/lib/mysql
 ln -sfn /mnt/nfs/wiki/data  /var/www/html
