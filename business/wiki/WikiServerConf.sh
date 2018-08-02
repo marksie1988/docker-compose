@@ -10,7 +10,7 @@ if [ ! -d "/mnt/nfs/wiki" ]; then
 fi
 
 # add nfs mount
-if grep -Fxq "10.8.10.100:/mnt/media/wiki/" /etc/fstab
+if ! grep -Fxq "10.8.10.100:/mnt/media/wiki/" /etc/fstab
 then
 echo "10.8.10.100:/mnt/media/wiki/      /mnt/nfs/wiki    nfs     auto,bg,nolock,noatime,actimeo=1800     0 0" >> /etc/fstab
 fi
